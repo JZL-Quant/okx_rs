@@ -110,7 +110,9 @@ impl OkxClient {
         }
         
         let request_builder = request_builder.body(body.to_string());
-        
+
+        debug!("<UNK>OKX API: {:?}", request_builder);
+
         let response = request_builder.send().await.map_err(Error::HttpError)?;
         
         let status_code = response.status();
