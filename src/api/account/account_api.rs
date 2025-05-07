@@ -17,7 +17,7 @@ pub struct OkxAccount {
 
 impl OkxAccount {
     /// 创建一个新的OkxAccount实例，使用给定的客户端
-    pub fn new(credentials: &Credentials) -> Self {
+    pub fn new(credentials: Credentials) -> Self {
         Self {
             // 创建客户端
             client: OkxClient::new(credentials)
