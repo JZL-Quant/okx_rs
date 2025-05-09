@@ -1,11 +1,11 @@
 use crate::api::API_ACCOUNT_PATH;
 use crate::client::OkxClient;
 use crate::config::Credentials;
+use crate::dto::account_model::{AccountBalanceInfo, AccountConfig, AccountRisk, Balance};
+use crate::dto::trade_model::PositionRespDto;
 use crate::error::Error;
-use crate::dto::account_model::{AccountConfig, AccountRisk, Balance};
 use reqwest::Method;
 use serde_json::json;
-use crate::dto::trade_model::PositionRespDto;
 
 /// OKX账户API
 /// 提供账户相关的API访问
@@ -17,11 +17,10 @@ pub struct OkxAccount {
 
 impl OkxAccount {
     /// 创建一个新的OkxAccount实例，使用给定的客户端
-    pub fn new(credentials: Credentials) -> Self {
+    pub fn new(client: OkxClient) -> Self {
         Self {
             // 创建客户端
-            client: OkxClient::new(credentials)
-                .unwrap(),
+            client,
         }
     }
 
@@ -45,8 +44,9 @@ impl OkxAccount {
         }
 
         self.client
-            .send_request::<Vec<Balance>>(Method::GET, &path, "")
+            .send_request::<Vec<AccountBalanceInfo>>(Method::GET, &path, "")
             .await
+            .map(|re| re[0].details.clone())
     }
 
     /// 查询持仓信息
@@ -203,7 +203,7 @@ impl OkxAccount {
             .send_request::<serde_json::Value>(Method::GET, &path, "")
             .await
     }
-    
+
     /// 获取账户持仓信息
     pub async fn get_account_positions(
         &self,
@@ -234,12 +234,11 @@ impl OkxAccount {
             .send_request::<Vec<PositionRespDto>>(Method::GET, &path, "")
             .await
     }
-} 
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::config::init_env;
-
 
     #[tokio::test]
     async fn test_get_balance() {

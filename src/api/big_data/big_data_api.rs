@@ -1,9 +1,9 @@
 use reqwest::Method;
 use tracing::debug;
 
-use crate::client::{OkxClient, OkxApiResponse};
-use crate::Error;
+use crate::client::{OkxApiResponse, OkxClient};
 use crate::dto::big_data::*;
+use crate::Error;
 
 pub struct OkxBigData {
     client: OkxClient,
@@ -13,16 +13,14 @@ impl OkxBigData {
     pub fn new(client: OkxClient) -> Self {
         OkxBigData { client }
     }
-    
+
     //获取交易大数据支持币种
-    pub async fn get_support_coin(&self) -> Result<OkxApiResponse<SupportCoin>,Error> {
+    pub async fn get_support_coin(&self) -> Result<OkxApiResponse<SupportCoin>, Error> {
         // 币种，如 BTC
         // 支持多币种查询（不超过20个），币种之间半角逗号分隔
         let path = "/api/v5/rubik/stat/trading-data/support-coin?".to_string();
         debug!("path:{:#?}", path);
-        self.client
-            .send_request(Method::GET, &path, "")
-            .await
+        self.client.send_request(Method::GET, &path, "").await
     }
 
     // 获取主动买入/卖出情况
@@ -40,7 +38,7 @@ impl OkxBigData {
         begin: Option<&str>,
         end: Option<&str>,
         period: Option<&str>,
-    ) -> Result<Vec<Vec<String>>,Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let mut path = format!(
             "/api/v5/rubik/stat/taker-volume?ccy={}&instType={}",
             ccy, inst_type
@@ -58,9 +56,7 @@ impl OkxBigData {
 
         debug!("path: {:#?}", path);
 
-        self.client
-            .send_request(Method::GET, &path, "")
-            .await
+        self.client.send_request(Method::GET, &path, "").await
     }
 
     // 获取合约主动买入/卖出情况
@@ -77,7 +73,7 @@ impl OkxBigData {
         begin: Option<&str>,
         end: Option<&str>,
         limit: Option<&str>,
-    ) -> Result<Vec<Vec<String>>,Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let mut path = format!(
             "/api/v5/rubik/stat/taker-volume-contract?instId={}",
             inst_id
@@ -100,9 +96,7 @@ impl OkxBigData {
 
         debug!("path: {:#?}", path);
 
-        self.client
-            .send_request(Method::GET, &path, "")
-            .await
+        self.client.send_request(Method::GET, &path, "").await
     }
 
     //获取精英交易员合约多空持仓人数比
@@ -117,7 +111,7 @@ impl OkxBigData {
         begin: Option<&str>,
         end: Option<&str>,
         limit: Option<&str>,
-    ) -> Result<Vec<Vec<String>>,Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let mut path = format!(
             "/api/v5/rubik/stat/contracts/long-short-account-ratio-contract-top-trader?instId={}",
             inst_id
@@ -138,9 +132,7 @@ impl OkxBigData {
 
         debug!("path: {:#?}", path);
 
-        self.client
-            .send_request(Method::GET, &path, "")
-            .await
+        self.client.send_request(Method::GET, &path, "").await
     }
 
     //获取精英交易员合约多空持仓仓位比
@@ -156,7 +148,7 @@ impl OkxBigData {
         begin: Option<&str>,
         end: Option<&str>,
         limit: Option<&str>,
-    ) -> Result<Vec<Vec<String>>,Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let mut path = format!(
             "/api/v5/rubik/stat/contracts/long-short-account-ratio-contract-top-trader?instId={}",
             inst_id
@@ -177,8 +169,6 @@ impl OkxBigData {
 
         debug!("path: {:#?}", path);
 
-        self.client
-            .send_request(Method::GET, &path, "")
-            .await
+        self.client.send_request(Method::GET, &path, "").await
     }
-} 
+}

@@ -58,7 +58,7 @@ pub enum ApiErrorCode {
     OperationFailed = 1,
     /// 批量操作部分成功
     PartialSuccess = 2,
-    
+
     // 通用错误码 (50000-50999)
     /// POST请求的body不能为空
     EmptyBody = 50000,
@@ -104,7 +104,7 @@ pub enum ApiErrorCode {
     MissingOkAccessSign = 50106,
     /// 请求头"OK-ACCESS-TIMESTAMP"不能为空
     MissingOkAccessTimestamp = 50107,
-    
+
     // 未知错误
     /// 未知错误
     Unknown = 99999,
@@ -152,4 +152,4 @@ impl ApiErrorCode {
 /// 把任何错误转换为Error类型的结果
 pub fn to_err<E: std::error::Error + Send + Sync + 'static>(err: E) -> Error {
     Error::Unknown(err.to_string())
-} 
+}

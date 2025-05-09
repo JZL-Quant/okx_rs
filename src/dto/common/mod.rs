@@ -115,4 +115,4 @@ pub struct PaginationInfo {
     /// 请求的数据条数
     #[serde(rename = "limit", skip_serializing_if = "Option::is_none")]
     pub limit: Option<String>,
-} 
+}

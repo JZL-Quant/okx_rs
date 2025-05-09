@@ -1,8 +1,8 @@
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
-use base64::{engine::general_purpose, Engine as _};
-use reqwest::Method;
 use crate::error::Error;
+use base64::{engine::general_purpose, Engine as _};
+use hmac::{Hmac, Mac};
+use reqwest::Method;
+use sha2::Sha256;
 
 /// 生成API请求签名
 pub fn generate_signature(
@@ -13,13 +13,13 @@ pub fn generate_signature(
     body: &str,
 ) -> Result<String, Error> {
     let sign_payload = format!("{}{}{}{}", timestamp, method.as_str(), path, body);
-    
+
     let mut hmac = Hmac::<Sha256>::new_from_slice(api_secret.as_bytes())
         .map_err(|e| Error::AuthenticationError(format!("创建HMAC失败: {}", e)))?;
-        
+
     hmac.update(sign_payload.as_bytes());
     let signature = general_purpose::STANDARD.encode(hmac.finalize().into_bytes());
-    
+
     Ok(signature)
 }
 
@@ -37,7 +37,8 @@ pub fn generate_expiration_timestamp(expiration_ms: i64) -> i64 {
 
 /// 从字符串解析毫秒时间戳
 pub fn parse_timestamp_ms(timestamp_str: &str) -> Result<i64, Error> {
-    timestamp_str.parse::<i64>()
+    timestamp_str
+        .parse::<i64>()
         .map_err(|_| Error::ParseError(format!("无法解析时间戳: {}", timestamp_str)))
 }
 
@@ -52,8 +53,8 @@ pub fn is_time_synchronized(server_time_ms: i64, allowed_diff_ms: i64) -> bool {
 pub fn timestamp_to_datetime(timestamp_ms: i64) -> Result<chrono::DateTime<chrono::Utc>, Error> {
     let seconds = timestamp_ms / 1000;
     let nanos = ((timestamp_ms % 1000) * 1_000_000) as u32;
-    
+
     chrono::NaiveDateTime::from_timestamp_opt(seconds, nanos)
         .map(|dt| chrono::DateTime::from_utc(dt, chrono::Utc))
         .ok_or_else(|| Error::ParseError(format!("无法转换时间戳: {}", timestamp_ms)))
-} 
+}

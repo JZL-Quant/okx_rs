@@ -101,4 +101,4 @@ pub struct Instrument {
     pub min_size: String,
     /// 产品状态
     pub state: String,
-} 
+}

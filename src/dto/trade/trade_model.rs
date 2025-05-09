@@ -1,5 +1,5 @@
+use crate::dto::common::{MarginMode, OrderType, PositionSide, Side};
 use serde::{Deserialize, Serialize};
-use crate::dto::common::{OrderType, Side, PositionSide, MarginMode};
 
 /// 订单信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -152,4 +152,4 @@ pub struct FeeRate {
     /// taker手续费率
     #[serde(rename = "takerFeeRate")]
     pub taker_fee_rate: String,
-} 
+}

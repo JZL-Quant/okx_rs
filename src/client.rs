@@ -1,7 +1,7 @@
+use log::{debug, info};
 use reqwest::{Client, Method, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use log::{debug, info};
 
 use crate::config::{Credentials, CONFIG};
 use crate::error::Error;
@@ -44,7 +44,7 @@ impl OkxClient {
             .timeout(Duration::from_millis(CONFIG.api_timeout_ms))
             .build()
             .map_err(Error::HttpError)?;
-            
+
         Ok(Self {
             client,
             credentials,
@@ -53,28 +53,28 @@ impl OkxClient {
             request_expiration_ms: CONFIG.request_expiration_ms,
         })
     }
-    
+
     /// 从环境变量创建OKX客户端
     pub fn from_env() -> Result<Self, Error> {
         let credentials = Credentials::from_env()?;
         Self::new(credentials)
     }
-    
+
     /// 设置是否使用模拟交易
     pub fn set_simulated_trading(&mut self, is_simulated: String) {
         self.is_simulated_trading = is_simulated;
     }
-    
+
     /// 设置API基础URL
     pub fn set_base_url(&mut self, base_url: impl Into<String>) {
         self.base_url = base_url.into();
     }
-    
+
     /// 设置请求有效期
     pub fn set_request_expiration(&mut self, expiration_ms: i64) {
         self.request_expiration_ms = expiration_ms;
     }
-    
+
     /// 发送API请求并返回反序列化的响应
     pub async fn send_request<T: for<'a> Deserialize<'a>>(
         &self,
@@ -90,13 +90,14 @@ impl OkxClient {
             path,
             body,
         )?;
-        
+
         let exp_time = utils::generate_expiration_timestamp(self.request_expiration_ms);
-        
+
         let url = format!("{}{}", self.base_url, path);
         debug!("请求OKX API: {}", url);
-        
-        let mut request_builder = self.client
+
+        let mut request_builder = self
+            .client
             .request(method, &url)
             .header("OK-ACCESS-KEY", &self.credentials.api_key)
             .header("OK-ACCESS-SIGN", signature)
@@ -104,38 +105,39 @@ impl OkxClient {
             .header("OK-ACCESS-PASSPHRASE", &self.credentials.passphrase)
             .header("Content-Type", "application/json")
             .header("expTime", exp_time.to_string());
-            
+
         if self.is_simulated_trading == "1" {
             request_builder = request_builder.header("x-simulated-trading", "1");
         }
-        
+
         let request_builder = request_builder.body(body.to_string());
 
         debug!("<UNK>OKX API: {:?}", request_builder);
 
         let response = request_builder.send().await.map_err(Error::HttpError)?;
-        
+
         let status_code = response.status();
         let response_body = response.text().await.map_err(Error::HttpError)?;
-        
+
         debug!("OKX API响应状态码: {}", status_code);
-        
+        debug!("{}", response_body);
+
         if status_code == StatusCode::OK {
-            let result: OkxApiResponse<T> = serde_json::from_str(&response_body)
-                .map_err(|e| Error::JsonError(e))?;
-                
+            let result: OkxApiResponse<T> =
+                serde_json::from_str(&response_body).map_err(|e| Error::JsonError(e))?;
+
             if result.code != "0" {
                 return Err(Error::OkxApiError {
                     code: result.code,
                     message: result.msg,
                 });
             }
-            
+
             Ok(result.data)
         } else {
-            let error: OkxApiErrorResponse = serde_json::from_str(&response_body)
-                .map_err(|e| Error::JsonError(e))?;
-                
+            let error: OkxApiErrorResponse =
+                serde_json::from_str(&response_body).map_err(|e| Error::JsonError(e))?;
+
             Err(Error::OkxApiError {
                 code: error.code,
                 message: error.msg,
